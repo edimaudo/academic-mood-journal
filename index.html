@@ -1,664 +1,521 @@
 <!DOCTYPE html>
-<html lang="en" data-bs-theme="light">
+<html lang="en" data-theme="dark" data-font-size="medium">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Academic Mood Journal</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <style>
-        .mood-card {
-            border: none;
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            transition: all 0.3s ease;
-            overflow: hidden;
-        }
-        
-        .mood-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-        }
-        
-        .sentiment-chart {
-            height: 20px; /* Made thinner */
-            background: linear-gradient(90deg, 
-                var(--bs-danger-bg-subtle) 0%,
-                var(--bs-warning-bg-subtle) 25%,
-                var(--bs-info-bg-subtle) 50%,
-                var(--bs-success-bg-subtle) 100%);
-            border-radius: 10px;
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .sentiment-indicator {
-            width: 20px;
-            height: 20px;
-            background: white;
-            border-radius: 50%;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-            position: absolute;
-            transition: all 0.5s ease;
-            transform: translateX(-50%);
-        }
-        
-        .tag-cloud {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-            margin-top: 1rem;
-        }
-        
-        .mood-tag {
-            padding: 0.25rem 0.75rem;
-            border-radius: 20px;
-            font-size: 0.875rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        
-        .mood-tag:hover {
-            transform: scale(1.05);
-        }
-        
-        .journal-entry {
-            background: var(--bs-body-bg);
-            border: 2px solid var(--bs-border-color);
-            border-radius: 10px;
-            padding: 1rem;
-            margin-bottom: 1rem;
-            position: relative;
-        }
-        
-        .journal-entry::before {
-            content: '';
-            position: absolute;
-            left: -2px;
-            top: 0;
-            bottom: 0;
-            width: 4px;
-            border-radius: 2px;
-        }
-        
-        .journal-entry.positive::before { background: var(--bs-success); }
-        .journal-entry.negative::before { background: var(--bs-danger); }
-        .journal-entry.neutral::before { background: var(--bs-secondary); }
-        .journal-entry.mixed::before { background: var(--bs-warning); }
-        
-        .pattern-insight {
-            background: linear-gradient(135deg, var(--bs-primary-bg-subtle), var(--bs-info-bg-subtle));
-            border-left: 4px solid var(--bs-primary);
-            padding: 1.5rem;
-            border-radius: 10px;
-            margin-bottom: 1rem;
-        }
-        
-        .theme-toggle {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 1050;
-        }
-        
-        .emotion-wheel {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 3rem;
-            margin: 0 auto;
-            transition: all 0.3s ease;
-        }
-        
-        .stats-card {
-            background: linear-gradient(45deg, var(--bs-primary), var(--bs-info));
-            color: white;
-            border-radius: 15px;
-        }
-        
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
-        }
-        
-        .pulsing { animation: pulse 2s infinite; }
-        
-        .line-chart-container {
-            width: 100%;
-            height: 150px;
-            position: relative;
-        }
-        
-        .line-chart-svg {
-            width: 100%;
-            height: 100%;
-        }
-        
-        @media (max-width: 768px) {
-            .theme-toggle {
-                position: relative;
-                top: auto;
-                right: auto;
-                margin-bottom: 1rem;
-            }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#121212">
+  <title>Academic Mood Journal</title>
+  <link rel="manifest" href="manifest.json">
+  
+  <style>
+    /* =========================================
+       FONT SCALING
+       Changes root percentage; all rem units scale
+       ========================================= */
+    html[data-font-size="small"] { font-size: 85%; }
+    html[data-font-size="medium"] { font-size: 100%; }
+    html[data-font-size="large"] { font-size: 115%; }
+
+    /* =========================================
+       THEME VARIABLES (The Economist Style)
+       ========================================= */
+    :root {
+      /* Editorial Typography */
+      --font-serif: Georgia, "Times New Roman", serif;
+      --font-sans: "Helvetica Neue", Helvetica, Arial, sans-serif;
+      --brand-red: #E3120B; /* Signature Economist Red */
+    }
+
+    /* Dark Mode (Default) */
+    html[data-theme="dark"] {
+      --bg-color: #121212;
+      --surface-color: #1C1C1C;
+      --text-color: #E8E8E8;
+      --text-muted: #A0A0A0;
+      --primary-color: var(--brand-red);
+      --primary-hover: #FF352E;
+      --focus-ring: #FFFFFF;
+      --error-bg: #8B0000;
+      --error-text: #FFFFFF;
+      --border-color: #333333;
+      --input-bg: #2A2A2A;
+    }
+
+    /* Light Mode */
+    html[data-theme="light"] {
+      --bg-color: #F1F2F3; /* Economist off-white background */
+      --surface-color: #FFFFFF;
+      --text-color: #0F0F0F;
+      --text-muted: #555555;
+      --primary-color: var(--brand-red);
+      --primary-hover: #B00E08;
+      --focus-ring: #0F0F0F;
+      --error-bg: #FFE5E5;
+      --error-text: #B00E08;
+      --border-color: #D5D5D5;
+      --input-bg: #FFFFFF;
+    }
+
+    /* =========================================
+       GLOBAL RESET & LAYOUT
+       ========================================= */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      font-family: var(--font-serif); /* Serif for body text */
+      line-height: 1.6;
+      transition: background-color 0.3s ease, color 0.3s ease;
+      display: flex;
+      justify-content: center;
+      padding: 2rem 1rem;
+    }
+
+    *:focus-visible {
+      outline: 2px solid var(--focus-ring);
+      outline-offset: 2px;
+    }
+
+    .app-container {
+      max-width: 650px;
+      width: 100%;
+      background-color: var(--surface-color);
+      padding: 2rem;
+      border-top: 6px solid var(--brand-red); /* Signature thick top border */
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    /* =========================================
+       HEADER & TYPOGRAPHY
+       ========================================= */
+    header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border-color);
+      gap: 1rem;
+    }
+
+    h1 {
+      font-family: var(--font-serif);
+      font-size: 1.8rem;
+      font-weight: normal;
+      letter-spacing: -0.02em;
+    }
+
+    h2, legend {
+      font-family: var(--font-sans);
+      text-transform: uppercase;
+      font-size: 0.9rem;
+      font-weight: bold;
+      color: var(--primary-color);
+      letter-spacing: 0.05em;
+      margin-bottom: 0.75rem;
+    }
+
+    /* =========================================
+       CONTROLS (Font & Theme)
+       ========================================= */
+    .controls-wrapper {
+      display: flex;
+      gap: 1.5rem;
+      align-items: center;
+    }
+
+    .font-controls {
+      display: flex;
+      border: 1px solid var(--border-color);
+    }
+
+    .font-btn {
+      background-color: var(--surface-color);
+      color: var(--text-color);
+      border: none;
+      border-right: 1px solid var(--border-color);
+      padding: 0.4rem 0.8rem;
+      font-family: var(--font-sans);
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+    
+    .font-btn:last-child {
+      border-right: none;
+    }
+
+    .font-btn.active {
+      background-color: var(--text-color);
+      color: var(--surface-color);
+    }
+
+    .theme-toggle {
+      background: none;
+      color: var(--text-color);
+      border: 1px solid var(--border-color);
+      padding: 0.4rem 0.8rem;
+      font-family: var(--font-sans);
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+
+    button:hover {
+      opacity: 0.8;
+    }
+
+    /* =========================================
+       FORM ELEMENTS
+       ========================================= */
+    .form-group {
+      margin-bottom: 2rem;
+      border: none;
+      padding: 0;
+    }
+
+    /* Micro-Journaling Mood Scale */
+    .mood-scale {
+      display: flex;
+      gap: 0; /* Flush buttons for editorial look */
+      border: 1px solid var(--border-color);
+      flex-wrap: wrap;
+    }
+
+    .mood-btn {
+      flex: 1;
+      background-color: var(--input-bg);
+      color: var(--text-color);
+      border: none;
+      border-right: 1px solid var(--border-color);
+      padding: 1rem 0.5rem;
+      text-align: center;
+      min-width: 80px;
+      font-family: var(--font-sans);
+      font-weight: bold;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: background-color 0.2s, color 0.2s;
+    }
+
+    .mood-btn:last-child {
+      border-right: none;
+    }
+
+    .mood-btn.selected {
+      background-color: var(--text-color);
+      color: var(--surface-color);
+    }
+
+    /* Context Tags */
+    .tag-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 0.5rem;
+    }
+
+    .tag-label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: var(--input-bg);
+      padding: 0.6rem;
+      border: 1px solid var(--border-color);
+      cursor: pointer;
+      font-family: var(--font-sans);
+      font-size: 0.9rem;
+    }
+
+    .tag-label input[type="checkbox"] {
+      width: 1.1rem;
+      height: 1.1rem;
+      accent-color: var(--primary-color);
+    }
+
+    /* Textarea */
+    textarea {
+      width: 100%;
+      background-color: var(--input-bg);
+      color: var(--text-color);
+      border: 1px solid var(--border-color);
+      padding: 1rem;
+      font-size: 1rem;
+      font-family: var(--font-serif);
+      resize: vertical;
+      min-height: 120px;
+    }
+
+    /* Submit Button */
+    .submit-btn {
+      width: 100%;
+      padding: 1rem;
+      font-size: 1rem;
+      font-family: var(--font-sans);
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      background-color: var(--primary-color);
+      color: #FFFFFF;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .submit-btn:hover {
+      background-color: var(--primary-hover);
+    }
+
+    /* =========================================
+       ALERTS & LOGS
+       ========================================= */
+    #crisis-alert {
+      display: none;
+      background-color: var(--error-bg);
+      color: var(--error-text);
+      padding: 1rem;
+      margin-bottom: 1.5rem;
+      font-family: var(--font-sans);
+      border-left: 4px solid var(--primary-color);
+    }
+
+    #crisis-alert a {
+      color: var(--error-text);
+      text-decoration: underline;
+      font-weight: bold;
+    }
+
+    .log-entry {
+      background-color: var(--input-bg);
+      padding: 1.5rem;
+      margin-top: 1rem;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .log-meta {
+      font-family: var(--font-sans);
+      font-size: 0.8rem;
+      color: var(--primary-color);
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+      font-weight: bold;
+    }
+  </style>
 </head>
 <body>
-    <button class="btn btn-outline-secondary theme-toggle" onclick="toggleTheme()" aria-label="Toggle dark/light theme">
-        <i class="fas fa-moon" id="theme-icon"></i>
-    </button>
 
-    <div class="container my-5">
-        <header class="text-center mb-5">
-            <h1 class="display-4 mb-3">
-                <i class="fas fa-heart text-danger me-2"></i>
-                Skool Mood
-            </h1>
-            <p class="lead text-muted">Track your academic work mood</p>
-        </header>
-
-        <div class="row">
-            <div class="col-lg-7 mb-4">
-                <div class="mood-card card h-100">
-                    <div class="card-header bg-primary text-white">
-                        <h3 class="mb-0">
-                            <i class="fas fa-pen-alt me-2"></i>
-                            Today's Journal Entry
-                        </h3>
-                    </div>
-                    <div class="card-body">
-                        <div class="mb-3">
-                            <label for="journalText" class="form-label">How are you feeling about your academics today?</label>
-                            <textarea class="form-control" id="journalText" rows="4" 
-                                placeholder="Describe your feelings about classes, assignments, studying, or any academic challenges you're facing..."></textarea>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label class="form-label">Tags (select all that apply):</label>
-                            <div class="tag-cloud" id="tagCloud">
-                                <span class="mood-tag badge bg-primary" onclick="toggleTag(this)" data-tag="mathematics">Mathematics</span>
-                                <span class="mood-tag badge bg-secondary" onclick="toggleTag(this)" data-tag="science">Science</span>
-                                <span class="mood-tag badge bg-success" onclick="toggleTag(this)" data-tag="english">English</span>
-                                <span class="mood-tag badge bg-info" onclick="toggleTag(this)" data-tag="history">History</span>
-                                <span class="mood-tag badge bg-warning" onclick="toggleTag(this)" data-tag="test">Test/Exam</span>
-                                <span class="mood-tag badge bg-danger" onclick="toggleTag(this)" data-tag="assignment">Assignment</span>
-                                <span class="mood-tag badge bg-dark" onclick="toggleTag(this)" data-tag="presentation">Presentation</span>
-                                <span class="mood-tag badge bg-primary" onclick="toggleTag(this)" data-tag="group-work">Group Work</span>
-                                <span class="mood-tag badge bg-secondary" onclick="toggleTag(this)" data-tag="homework">Homework</span>
-                                <span class="mood-tag badge bg-success" onclick="toggleTag(this)" data-tag="study-session">Study Session</span>
-                            </div>
-                        </div>
-                        
-                        <button class="btn btn-primary btn-lg w-100" onclick="addJournalEntry()">
-                            <i class="fas fa-save me-2"></i>Save Entry & Analyze
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-lg-5">
-                <div class="row">
-                    <div class="col-12">
-                        <div class="stats-card card mb-4">
-                            <div class="card-body text-center">
-                                <div class="emotion-wheel mb-3" id="currentMood"><i class="far fa-smile"></i></div>
-                                <h5 class="text-white">Current Mood</h5>
-                                <p class="mb-0 text-light" id="sentimentText">Positive</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-6 mb-4">
-                        <div class="card h-100">
-                            <div class="card-header bg-primary text-white">
-                                <h5 class="mb-0">Entries Overview</h5>
-                            </div>
-                            <div class="card-body d-flex flex-column align-items-center justify-content-center">
-                                <div class="text-center mb-3">
-                                    <div class="display-6 fw-bold text-success" id="totalEntries">7</div>
-                                    <small class="text-muted">Entries</small>
-                                </div>
-                                <div class="sentiment-chart-container w-100">
-                                    <div class="sentiment-chart">
-                                        <div class="sentiment-indicator" id="overallIndicator" style="left: 75%;"></div>
-                                    </div>
-                                    <div class="d-flex justify-content-between mt-2">
-                                        <small class="text-danger fw-bold">Negative</small>
-                                        <small class="text-success fw-bold">Positive</small>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-6 mb-4">
-                        <div class="card h-100">
-                            <div class="card-header bg-primary text-white">
-                                <h5 class="mb-0">Mood Over Time</h5>
-                            </div>
-                            <div class="card-body d-flex flex-column align-items-center justify-content-center">
-                                <div id="moodTrendChart" class="line-chart-container">
-                                    </div>
-                                <small class="text-muted text-center mt-2">Last 3 entries</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+  <main class="app-container">
+    <header>
+      <h1>Academic Mood</h1>
+      <div class="controls-wrapper">
+        <div class="font-controls" role="group" aria-label="Text Size Controls">
+          <button class="font-btn" data-size="small" aria-label="Small text">A-</button>
+          <button class="font-btn active" data-size="medium" aria-label="Medium text">A</button>
+          <button class="font-btn" data-size="large" aria-label="Large text">A+</button>
         </div>
-        
-        <div class="row mt-5">
-            <div class="col-lg-6 mb-4">
-                <h3><i class="fas fa-lightbulb text-warning me-2"></i>Insights</h3>
-                <div id="insightsContainer">
-                    <div class="pattern-insight">
-                        <h5><i class="fas fa-chart-trend-up text-primary me-2"></i>Pattern Detected</h5>
-                        <p class="mb-2">You've reported feeling anxious before <strong>Mathematics</strong> tests 4 out of 5 times.</p>
-                        <div class="alert alert-info mb-0">
-                            <strong>Suggestion:</strong> Try reviewing math concepts 2 days before tests instead of cramming. Consider forming a study group or asking for extra help during office hours.
-                        </div>
-                    </div>
-                    
-                    <div class="pattern-insight">
-                        <h5><i class="fas fa-heart text-danger me-2"></i>Emotional Trigger Identified</h5>
-                        <p class="mb-2">Your confidence increases significantly after successful <strong>Group Work</strong> sessions.</p>
-                        <div class="alert alert-success mb-0">
-                            <strong>Suggestion:</strong> Continue collaborative learning! Your teamwork skills are a strength that boosts your academic confidence.
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <button id="theme-toggle" class="theme-toggle" aria-label="Toggle Light/Dark Mode">Invert</button>
+      </div>
+    </header>
 
-            <div class="col-lg-6 mb-4">
-                <h3><i class="fas fa-history me-2"></i>Recent Journal Entries</h3>
-                <div id="journalHistory">
-                    <div class="journal-entry positive">
-                        <div class="d-flex justify-content-between align-items-start mb-2">
-                            <small class="text-muted">June 14, 2025 - 3:45 PM</small>
-                            <div>
-                                <span class="badge bg-primary me-1">Mathematics</span>
-                                <span class="badge bg-success">Group Work</span>
-                            </div>
-                        </div>
-                        <p class="mb-1">Had a great study session with my math group today! We worked through those challenging algebra problems and I finally understand the concept. Feeling much more confident about tomorrow's quiz.</p>
-                        <small class="text-success"><i class="fas fa-smile me-1"></i>Mood: Positive (85%)</small>
-                    </div>
-
-                    <div class="journal-entry mixed">
-                        <div class="d-flex justify-content-between align-items-start mb-2">
-                            <small class="text-muted">June 12, 2025 - 7:20 PM</small>
-                            <div>
-                                <span class="badge bg-secondary me-1">Science</span>
-                                <span class="badge bg-warning">Assignment</span>
-                            </div>
-                        </div>
-                        <p class="mb-1">Science project is due tomorrow and I'm feeling a bit overwhelmed. Made good progress on the research part but the presentation slides need work. Staying up late but manageable.</p>
-                        <small class="text-warning"><i class="fas fa-meh me-1"></i>Mood: Mixed (60%)</small>
-                    </div>
-
-                    <div class="journal-entry negative">
-                        <div class="d-flex justify-content-between align-items-start mb-2">
-                            <small class="text-muted">June 10, 2025 - 10:15 PM</small>
-                            <div>
-                                <span class="badge bg-primary me-1">Mathematics</span>
-                                <span class="badge bg-warning">Test</span>
-                            </div>
-                        </div>
-                        <p class="mb-1">Really stressed about the upcoming math test. The new chapter on quadratic equations is confusing me. Spent 3 hours studying but still don't feel prepared. Need to ask for help.</p>
-                        <small class="text-danger"><i class="fas fa-frown me-1"></i>Mood: Negative (25%)</small>
-                    </div>
-                </div>
-            </div>
-        </div>
+    <div id="crisis-alert" role="alert" aria-live="assertive">
+      Distress detected. Confidential support is available 24/7. <br>
+      <a href="tel:988">Call or Text 988</a> immediately.
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
-    <script>
-        let selectedTags = [];
-        let journalEntries = [
-            // Sample entries for initial display
-            { text: 'Initial positive entry.', tags: ['mathematics'], sentiment: 'positive', score: 85, timestamp: new Date('2025-06-14T15:45:00') },
-            { text: 'Initial mixed entry.', tags: ['science'], sentiment: 'mixed', score: 60, timestamp: new Date('2025-06-12T19:20:00') },
-            { text: 'Initial negative entry.', tags: ['mathematics'], sentiment: 'negative', score: 25, timestamp: new Date('2025-06-10T22:15:00') }
-        ];
-        
-        const sentimentKeywords = {
-            positive: ['happy', 'excited', 'confident', 'great', 'awesome', 'understand', 'progress', 'successful', 'proud', 'accomplished', 'good', 'better', 'improved'],
-            negative: ['stressed', 'anxious', 'worried', 'confused', 'overwhelmed', 'frustrated', 'difficult', 'hard', 'struggling', 'tired', 'exhausted', 'scared'],
-            mixed: ['okay', 'fine', 'manageable', 'mixed', 'somewhat', 'partially', 'getting', 'trying']
-        };
+    <form id="journal-form" novalidate>
+      
+      <fieldset class="form-group">
+        <legend>Current State</legend>
+        <div class="mood-scale" role="radiogroup" aria-labelledby="mood-label">
+          <button type="button" class="mood-btn" data-value="Exhausted" aria-pressed="false">Exhausted</button>
+          <button type="button" class="mood-btn" data-value="Stressed" aria-pressed="false">Stressed</button>
+          <button type="button" class="mood-btn" data-value="Neutral" aria-pressed="false">Neutral</button>
+          <button type="button" class="mood-btn" data-value="Focused" aria-pressed="false">Focused</button>
+          <button type="button" class="mood-btn" data-value="Great" aria-pressed="false">Great</button>
+        </div>
+        <input type="hidden" id="mood-value" required>
+      </fieldset>
 
-        function toggleTheme() {
-            const html = document.documentElement;
-            const themeIcon = document.getElementById('theme-icon');
-            const currentTheme = html.getAttribute('data-bs-theme');
-            
-            if (currentTheme === 'light') {
-                html.setAttribute('data-bs-theme', 'dark');
-                themeIcon.className = 'fas fa-sun';
-            } else {
-                html.setAttribute('data-bs-theme', 'light');
-                themeIcon.className = 'fas fa-moon';
-            }
-        }
+      <fieldset class="form-group">
+        <legend>Catalysts (Select all that apply)</legend>
+        <div class="tag-grid">
+          <label class="tag-label"><input type="checkbox" value="Exams"> Exams</label>
+          <label class="tag-label"><input type="checkbox" value="Thesis"> Thesis</label>
+          <label class="tag-label"><input type="checkbox" value="Lab Work"> Lab Work</label>
+          <label class="tag-label"><input type="checkbox" value="Lectures"> Lectures</label>
+          <label class="tag-label"><input type="checkbox" value="Imposter Syndrome"> Imposter Syndrome</label>
+          <label class="tag-label"><input type="checkbox" value="Peer Pressure"> Peer Pressure</label>
+        </div>
+      </fieldset>
 
-        function toggleTag(tagElement) {
-            const tag = tagElement.dataset.tag;
-            
-            if (selectedTags.includes(tag)) {
-                selectedTags = selectedTags.filter(t => t !== tag);
-                tagElement.style.opacity = '0.6';
-                tagElement.style.transform = 'scale(1)';
-            } else {
-                selectedTags.push(tag);
-                tagElement.style.opacity = '1';
-                tagElement.style.transform = 'scale(1.1)';
-            }
-        }
+      <div class="form-group">
+        <legend>Editorial Notes (Private)</legend>
+        <textarea id="journal-note" placeholder="Record your thoughts here..."></textarea>
+      </div>
 
-        function analyzeSentiment(text) {
-            const words = text.toLowerCase().split(/\s+/);
-            let positiveScore = 0;
-            let negativeScore = 0;
-            let mixedScore = 0;
+      <button type="submit" class="submit-btn">File Entry</button>
+    </form>
 
-            words.forEach(word => {
-                if (sentimentKeywords.positive.some(keyword => word.includes(keyword))) {
-                    positiveScore += 2;
-                }
-                if (sentimentKeywords.negative.some(keyword => word.includes(keyword))) {
-                    negativeScore += 2;
-                }
-                if (sentimentKeywords.mixed.some(keyword => word.includes(keyword))) {
-                    mixedScore += 1;
-                }
-            });
+    <section id="recent-logs" style="margin-top: 3rem;">
+      <h2>Recent Filings</h2>
+      <div id="logs-container"></div>
+    </section>
+  </main>
 
-            const total = positiveScore + negativeScore + mixedScore;
-            if (total === 0) return { sentiment: 'neutral', score: 50 };
+  <script>
+    // --- UI CONTROLS: THEME ---
+    const htmlEl = document.documentElement;
+    const themeBtn = document.getElementById('theme-toggle');
 
-            const positivePercentage = (positiveScore / total) * 100;
-            const negativePercentage = (negativeScore / total) * 100;
+    themeBtn.addEventListener('click', () => {
+      const currentTheme = htmlEl.getAttribute('data-theme');
+      htmlEl.setAttribute('data-theme', currentTheme === 'dark' ? 'light' : 'dark');
+    });
 
-            if (positiveScore > negativeScore && positiveScore > mixedScore) {
-                return { sentiment: 'positive', score: Math.min(85, 50 + positivePercentage) };
-            } else if (negativeScore > positiveScore && negativeScore > mixedScore) {
-                return { sentiment: 'negative', score: Math.max(15, 50 - negativePercentage) };
-            } else {
-                return { sentiment: 'mixed', score: 40 + Math.random() * 20 };
-            }
-        }
+    // --- UI CONTROLS: FONT SIZING ---
+    const fontBtns = document.querySelectorAll('.font-btn');
+    
+    fontBtns.forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        // Remove active class from all buttons
+        fontBtns.forEach(b => b.classList.remove('active'));
+        // Add active class to clicked button
+        e.target.classList.add('active');
+        // Update HTML data attribute to trigger CSS rem scaling
+        htmlEl.setAttribute('data-font-size', e.target.getAttribute('data-size'));
+      });
+    });
 
-        function updateMoodDisplay(sentiment, score) {
-            const moodElement = document.getElementById('currentMood');
-            const sentimentText = document.getElementById('sentimentText');
-            
-            switch(sentiment) {
-                case 'positive':
-                    moodElement.innerHTML = '<i class="far fa-smile"></i>';
-                    sentimentText.textContent = `Positive (${Math.round(score)}%)`;
-                    break;
-                case 'negative':
-                    moodElement.innerHTML = '<i class="far fa-frown"></i>';
-                    sentimentText.textContent = `Concerned (${Math.round(score)}%)`;
-                    break;
-                case 'mixed':
-                    moodElement.innerHTML = '<i class="far fa-meh"></i>';
-                    sentimentText.textContent = `Mixed (${Math.round(score)}%)`;
-                    break;
-                default:
-                    moodElement.innerHTML = '<i class="far fa-smile"></i>';
-                    sentimentText.textContent = 'Neutral (50%)';
-            }
-            
-            moodElement.classList.add('pulsing');
-            setTimeout(() => moodElement.classList.remove('pulsing'), 2000);
-        }
+    // --- MICRO-JOURNALING LOGIC ---
+    const moodBtns = document.querySelectorAll('.mood-btn');
+    const moodInput = document.getElementById('mood-value');
 
-        function addJournalEntry() {
-            const text = document.getElementById('journalText').value.trim();
-            if (!text) {
-                alert('Please write something in your journal entry!');
-                return;
-            }
-
-            const analysis = analyzeSentiment(text);
-            const entry = {
-                text: text,
-                tags: [...selectedTags],
-                sentiment: analysis.sentiment,
-                score: analysis.score,
-                timestamp: new Date()
-            };
-
-            journalEntries.unshift(entry);
-            updateMoodDisplay(analysis.sentiment, analysis.score);
-            addEntryToHistory(entry);
-            updateEntriesOverview();
-            addMoodTrendChart();
-            generateInsights();
-            
-            // Clear form
-            document.getElementById('journalText').value = '';
-            selectedTags = [];
-            document.querySelectorAll('.mood-tag').forEach(tag => {
-                tag.style.opacity = '0.6';
-                tag.style.transform = 'scale(1)';
-            });
-            
-            // Show success message
-            showSuccessMessage();
-        }
-
-        function updateEntriesOverview() {
-            const totalEntries = journalEntries.length;
-            document.getElementById('totalEntries').textContent = totalEntries;
-
-            if (totalEntries > 0) {
-                const totalScore = journalEntries.reduce((sum, entry) => sum + entry.score, 0);
-                const averageScore = totalScore / totalEntries;
-                document.getElementById('overallIndicator').style.left = `${averageScore}%`;
-            } else {
-                document.getElementById('overallIndicator').style.left = '50%'; // Reset to neutral
-            }
-        }
-        
-        function addMoodTrendChart() {
-            const chartContainer = document.getElementById('moodTrendChart');
-            chartContainer.innerHTML = '';
-            
-            const recentEntries = journalEntries.slice(0, 3).reverse();
-            if (recentEntries.length < 2) {
-                // Not enough data for a line chart
-                chartContainer.innerHTML = '<p class="text-center text-muted m-0 p-3">Enter more entries to see your mood trend.</p>';
-                return;
-            }
-            
-            const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-            svg.setAttribute("class", "line-chart-svg");
-            svg.setAttribute("viewBox", "0 0 100 100");
-            svg.setAttribute("preserveAspectRatio", "none");
-            
-            const scores = recentEntries.map(e => e.score);
-            const points = scores.map((score, index) => {
-                const x = (index / (scores.length - 1)) * 100;
-                const y = 100 - score; 
-                return `${x},${y}`;
-            }).join(' ');
-            
-            const path = document.createElementNS("http://www.w3.org/2000/svg", "polyline");
-            path.setAttribute("points", points);
-            path.setAttribute("fill", "none");
-            path.setAttribute("stroke", "var(--bs-primary)");
-            path.setAttribute("stroke-width", "2");
-            
-            svg.appendChild(path);
-            
-            // Add circles for each data point
-            scores.forEach((score, index) => {
-                const x = (index / (scores.length - 1)) * 100;
-                const y = 100 - score;
-                const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-                circle.setAttribute("cx", x);
-                circle.setAttribute("cy", y);
-                circle.setAttribute("r", "2");
-                circle.setAttribute("fill", "var(--bs-primary)");
-                svg.appendChild(circle);
-            });
-            
-            chartContainer.appendChild(svg);
-        }
-
-        function addEntryToHistory(entry) {
-            const history = document.getElementById('journalHistory');
-            const entryDiv = document.createElement('div');
-            entryDiv.className = `journal-entry ${entry.sentiment}`;
-            
-            const tagsHtml = entry.tags.map(tag => 
-                `<span class="badge bg-primary me-1">${tag.replace('-', ' ').toUpperCase()}</span>`
-            ).join('');
-            
-            const sentimentIcon = {
-                'positive': 'fas fa-smile',
-                'negative': 'fas fa-frown', 
-                'mixed': 'fas fa-meh',
-                'neutral': 'fas fa-meh'
-            }[entry.sentiment];
-            
-            const sentimentColor = {
-                'positive': 'text-success',
-                'negative': 'text-danger',
-                'mixed': 'text-warning',
-                'neutral': 'text-secondary'
-            }[entry.sentiment];
-
-            entryDiv.innerHTML = `
-                <div class="d-flex justify-content-between align-items-start mb-2">
-                    <small class="text-muted">${entry.timestamp.toLocaleString()}</small>
-                    <div>${tagsHtml}</div>
-                </div>
-                <p class="mb-1">${entry.text}</p>
-                <small class="${sentimentColor}">
-                    <i class="${sentimentIcon} me-1"></i>
-                    Mood: ${entry.sentiment.charAt(0).toUpperCase() + entry.sentiment.slice(1)} (${Math.round(entry.score)}%)
-                </small>
-            `;
-            
-            history.insertBefore(entryDiv, history.firstChild);
-            
-            // Keep only last 10 entries visible
-            while (history.children.length > 10) {
-                history.removeChild(history.lastChild);
-            }
-        }
-
-        function generateInsights() {
-            if (journalEntries.length < 3) return; // Need some data for insights
-            
-            const insightsContainer = document.getElementById('insightsContainer');
-            
-            // Analyze patterns by tags
-            const tagSentiments = {};
-            journalEntries.forEach(entry => {
-                entry.tags.forEach(tag => {
-                    if (!tagSentiments[tag]) tagSentiments[tag] = [];
-                    tagSentiments[tag].push(entry.sentiment);
-                });
-            });
-            
-            // Find concerning patterns
-            const insights = [];
-            Object.keys(tagSentiments).forEach(tag => {
-                const sentiments = tagSentiments[tag];
-                const negativeCount = sentiments.filter(s => s === 'negative').length;
-                if (sentiments.length >= 3 && negativeCount / sentiments.length > 0.6) {
-                    insights.push({
-                        type: 'concern',
-                        tag: tag,
-                        message: `You've reported negative feelings about <strong>${tag.replace('-', ' ')}</strong> in ${negativeCount} out of ${sentiments.length} recent entries.`,
-                        suggestion: getTagSuggestion(tag)
-                    });
-                }
-                
-                const positiveCount = sentiments.filter(s => s === 'positive').length;
-                if (sentiments.length >= 2 && positiveCount / sentiments.length > 0.7) {
-                    insights.push({
-                        type: 'strength',
-                        tag: tag,
-                        message: `<strong>${tag.replace('-', ' ')}</strong> consistently brings you positive feelings!`,
-                        suggestion: `Keep leveraging your strength in ${tag.replace('-', ' ')} to boost confidence in other areas.`
-                    });
-                }
-            });
-            
-            // Update insights display
-            if (insights.length > 0) {
-                insightsContainer.innerHTML = insights.slice(0, 3).map(insight => `
-                    <div class="pattern-insight">
-                        <h5>
-                            <i class="fas ${insight.type === 'concern' ? 'fa-exclamation-triangle text-warning' : 'fa-trophy text-success'} me-2"></i>
-                            ${insight.type === 'concern' ? 'Pattern Detected' : 'Strength Identified'}
-                        </h5>
-                        <p class="mb-2">${insight.message}</p>
-                        <div class="alert ${insight.type === 'concern' ? 'alert-info' : 'alert-success'} mb-0">
-                            <strong>Suggestion:</strong> ${insight.suggestion}
-                        </div>
-                    </div>
-                `).join('');
-            }
-        }
-
-        function getTagSuggestion(tag) {
-            const suggestions = {
-                'mathematics': 'Try breaking down complex problems into smaller steps. Consider seeking help from a tutor or study group.',
-                'science': 'Visual aids and hands-on experiments can help make abstract concepts more concrete.',
-                'test': 'Create a study schedule starting a week before tests. Practice relaxation techniques to manage test anxiety.',
-                'assignment': 'Break large assignments into smaller, manageable tasks. Set mini-deadlines for each part.',
-                'presentation': 'Practice in front of friends or family. Record yourself to identify areas for improvement.',
-                'homework': 'Create a dedicated study space and set specific homework times to build routine.'
-            };
-            return suggestions[tag] || 'Consider talking to a teacher, counselor, or trusted friend about these challenges.';
-        }
-
-        function showSuccessMessage() {
-            const toast = document.createElement('div');
-            toast.className = 'toast-container position-fixed top-0 end-0 p-3';
-            toast.innerHTML = `
-                <div class="toast show" role="alert">
-                    <div class="toast-header bg-success text-white">
-                        <i class="fas fa-check-circle me-2"></i>
-                        <strong class="me-auto">Entry Saved!</strong>
-                    </div>
-                    <div class="toast-body">
-                        Your journal entry has been analyzed and saved successfully.
-                    </div>
-                </div>
-            `;
-            document.body.appendChild(toast);
-            setTimeout(() => toast.remove(), 3000);
-        }
-
-        // Initialize
-        document.addEventListener('DOMContentLoaded', function() {
-            // Set initial tag opacity
-            document.querySelectorAll('.mood-tag').forEach(tag => {
-                tag.style.opacity = '0.6';
-            });
-            // Update the overview and mood chart on load with the sample data
-            updateEntriesOverview();
-            addMoodTrendChart();
+    moodBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        moodBtns.forEach(b => {
+          b.classList.remove('selected');
+          b.setAttribute('aria-pressed', 'false');
         });
+        btn.classList.add('selected');
+        btn.setAttribute('aria-pressed', 'true');
+        moodInput.value = btn.getAttribute('data-value');
+      });
+    });
 
-        // Keyboard shortcuts
-        document.addEventListener('keydown', function(e) {
-            if (e.altKey && e.key === 't') toggleTheme();
-            if (e.altKey && e.key === 's') addJournalEntry();
-        });
-    </script>
+    // --- CLIENT-SIDE NLP (CRISIS SIMULATION) ---
+    const crisisKeywords = /\b(hopeless|give up|suicide|pointless|overwhelmed|depressed|can't take it)\b/i;
+    const noteInput = document.getElementById('journal-note');
+    const crisisAlert = document.getElementById('crisis-alert');
+
+    noteInput.addEventListener('input', (e) => {
+      const text = e.target.value;
+      if (crisisKeywords.test(text)) {
+        crisisAlert.style.display = 'block';
+      } else {
+        crisisAlert.style.display = 'none';
+      }
+    });
+
+    // --- LOCAL-FIRST DATA STORAGE (IndexedDB) ---
+    let db;
+    const dbName = "AcademicMoodDB";
+    const request = indexedDB.open(dbName, 1);
+
+    request.onerror = (event) => console.error("Database error: ", event.target.error);
+    
+    request.onupgradeneeded = (event) => {
+      db = event.target.result;
+      const objectStore = db.createObjectStore("logs", { keyPath: "id", autoIncrement: true });
+      objectStore.createIndex("date", "date", { unique: false });
+    };
+
+    request.onsuccess = (event) => {
+      db = event.target.result;
+      displayLogs(); 
+    };
+
+    function saveLogToDB(logData) {
+      const transaction = db.transaction(["logs"], "readwrite");
+      const objectStore = transaction.objectStore("logs");
+      objectStore.add(logData);
+      transaction.oncomplete = () => displayLogs();
+    }
+
+    function displayLogs() {
+      const container = document.getElementById('logs-container');
+      container.innerHTML = '';
+      
+      const objectStore = db.transaction("logs").objectStore("logs");
+      const logs = [];
+      
+      objectStore.openCursor().onsuccess = (event) => {
+        const cursor = event.target.result;
+        if (cursor) {
+          logs.unshift(cursor.value); // Newest first
+          cursor.continue();
+        } else {
+          logs.slice(0, 5).forEach(log => {
+            const div = document.createElement('div');
+            div.className = 'log-entry';
+            
+            // Format date for editorial style
+            const dateObj = new Date(log.date);
+            const dateStr = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+            const timeStr = dateObj.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+
+            div.innerHTML = `
+              <div class="log-meta">${dateStr} | ${timeStr}</div>
+              <p><strong>State:</strong> ${log.mood}</p>
+              <p><strong>Catalysts:</strong> ${log.tags.length > 0 ? log.tags.join(', ') : 'None'}</p>
+              ${log.note ? `<p style="margin-top:0.5rem;"><em>"${log.note}"</em></p>` : ''}
+            `;
+            container.appendChild(div);
+          });
+        }
+      };
+    }
+
+    // --- FORM SUBMISSION ---
+    document.getElementById('journal-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      
+      if (!moodInput.value) {
+        alert("Please select your current state.");
+        return;
+      }
+
+      const selectedTags = Array.from(document.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value);
+      
+      const logEntry = {
+        date: new Date().toISOString(),
+        mood: moodInput.value,
+        tags: selectedTags,
+        note: noteInput.value
+      };
+
+      saveLogToDB(logEntry);
+      
+      // Reset
+      e.target.reset();
+      moodBtns.forEach(b => {
+        b.classList.remove('selected');
+        b.setAttribute('aria-pressed', 'false');
+      });
+      moodInput.value = '';
+      crisisAlert.style.display = 'none';
+    });
+
+    // --- PWA REGISTRATION ---
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(() => {});
+      });
+    }
+  </script>
 </body>
 </html>
